@@ -1,1 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D2D Product Catalog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1>D2D Product Catalog</h1>
+        <p class="subtitle">Browse products, save favorites, and request prices.</p>
+      </div>
+      <button id="viewListBtn" class="btn btn-accent">
+        View &amp; Save Favorites
+      </button>
+    </header>
 
+    <section class="controls">
+      <div class="search-container">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search by name, SKU, dimension, type..."
+        />
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <div id="typeFilter" class="type-filter"></div>
+        </div>
+
+        <div class="filter-group small">
+          <label class="switch">
+            <input type="checkbox" id="inStockOnly" />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="switch-label">In stock only</span>
+        </div>
+
+        <div class="filter-group small">
+          <label class="switch">
+            <input type="checkbox" id="favoritesOnly" />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="switch-label">Favorites only</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="messageBar" class="message-bar hidden"></section>
+
+    <main id="productList" class="product-list">
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p>Loading catalog...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Ask for Price Modal -->
+  <div id="priceModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Ask for price</h2>
+        <button class="icon-btn" data-close-modal="priceModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-product-summary">
+          <div class="modal-product-title" id="priceModalProductName"></div>
+          <div class="modal-product-meta">
+            <span id="priceModalSku"></span>
+            <span id="priceModalItemId"></span>
+          </div>
+        </div>
+
+        <form id="priceForm">
+          <label class="field">
+            <span>Restaurant name *</span>
+            <input type="text" id="priceRestaurantName" required />
+          </label>
+
+          <label class="field">
+            <span>Contact name (optional)</span>
+            <input type="text" id="priceContactName" />
+          </label>
+
+          <div class="field-inline">
+            <label class="field">
+              <span>Phone</span>
+              <input type="text" id="priceContactPhone" />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input type="email" id="priceContactEmail" />
+            </label>
+          </div>
+
+          <p class="hint">
+            At least one of phone or email is required.
+          </p>
+
+          <label class="field">
+            <span>Notes (optional)</span>
+            <textarea id="priceNotes" rows="3"></textarea>
+          </label>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal="priceModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Submit request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Favorites as List Modal -->
+  <div id="listModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Save favorites as a list</h2>
+        <button class="icon-btn" data-close-modal="listModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="listForm">
+          <label class="field">
+            <span>List name (e.g. restaurant name) *</span>
+            <input type="text" id="listName" required />
+          </label>
+
+          <label class="field">
+            <span>Restaurant name *</span>
+            <input type="text" id="listRestaurantName" required />
+          </label>
+
+          <label class="field">
+            <span>Contact name (optional)</span>
+            <input type="text" id="listContactName" />
+          </label>
+
+          <div class="field-inline">
+            <label class="field">
+              <span>Phone</span>
+              <input type="text" id="listContactPhone" />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input type="email" id="listContactEmail" />
+            </label>
+          </div>
+
+          <p class="hint">
+            At least one of phone or email is required.
+          </p>
+
+          <div id="listItemsContainer" class="list-items-container">
+            <!-- Favorite items with quantity inputs will be rendered here -->
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal="listModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save &amp; send list
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Request Modal -->
+  <div id="editModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Request an edit</h2>
+        <button class="icon-btn" data-close-modal="editModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-product-summary">
+          <div class="modal-product-title" id="editModalProductName"></div>
+          <div class="modal-product-meta">
+            <span id="editModalSku"></span>
+            <span id="editModalItemId"></span>
+          </div>
+        </div>
+
+        <form id="editForm">
+          <label class="field">
+            <span>What needs to be corrected or updated? (optional)</span>
+            <textarea id="editReason" rows="4"></textarea>
+          </label>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal="editModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Submit edit request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

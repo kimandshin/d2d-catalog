@@ -220,20 +220,21 @@ function applyFiltersAndRender() {
   const favoritesOnly = favoritesOnlyEl.checked;
 
   filteredCatalog = catalog.filter((item) => {
-    // Search filter
+    // Search filter (now includes description)
     if (search) {
-      const haystack =
-        [
-          item.productName,
-          item.sku,
-          item.dimension,
-          item.volume,
-          item.type,
-          item.memo,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+      const haystack = [
+        item.productName,
+        item.description,   // ✅ added
+        item.sku,
+        item.dimension,
+        item.volume,
+        item.type,
+        item.memo,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
       if (!haystack.includes(search)) {
         return false;
       }

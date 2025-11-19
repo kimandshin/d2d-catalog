@@ -485,18 +485,17 @@ async function submitPriceRequest() {
 
   try {
     setMessage("Sending price request...", "info", 0);
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "API error");
-    }
-    setMessage("Price request sent. David will contact you soon.", "info", 5000);
+    await fetch(API_URL, {
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "text/plain;charset=utf-8",
+  },
+  body: JSON.stringify(payload),
+});
+
+// We can’t read the response in no-cors mode, but Apps Script will run.
+setMessage("Price request sent. David will contact you soon.", "info", 5000);
     closeModal(priceModalEl);
   } catch (err) {
     console.error(err);
@@ -603,28 +602,26 @@ async function submitSaveList() {
 
   try {
     setMessage("Saving list...", "info", 0);
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "API error");
+    await fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  setMessage(
+    "List saved and sent. David will review it shortly.",
+    "info",
+    5000
+  );
+  closeModal(listModalEl);
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to save list: " + err.message, "error", 6000);
     }
-    setMessage(
-      "List saved and sent. David will review it shortly.",
-      "info",
-      5000
-    );
-    closeModal(listModalEl);
-  } catch (err) {
-    console.error(err);
-    setMessage("Failed to save list: " + err.message, "error", 6000);
   }
-}
 
 /* Edit Modal */
 
@@ -651,23 +648,21 @@ async function submitEditRequest() {
 
   try {
     setMessage("Sending edit request...", "info", 0);
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "API error");
-    }
-    setMessage(
-      "Edit request submitted. David will review this item.",
-      "info",
-      5000
-    );
-    closeModal(editModalEl);
+   await fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  setMessage(
+    "Edit request submitted. David will review this item.",
+    "info",
+    5000
+  );
+  closeModal(editModalEl);
   } catch (err) {
     console.error(err);
     setMessage("Failed to submit edit request: " + err.message, "error", 6000);

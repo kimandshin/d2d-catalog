@@ -222,18 +222,19 @@ function applyFiltersAndRender() {
   filteredCatalog = catalog.filter((item) => {
     // Search filter (now includes description)
     if (search) {
-      const haystack = [
-        item.productName,
-        item.description,   // ✅ added
-        item.sku,
-        item.dimension,
-        item.volume,
-        item.type,
-        item.memo,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+     const haystack = [
+      item.productName,
+      item.description,
+      item.supplier,    // ✅ new line
+      item.sku,
+      item.dimension,
+      item.volume,
+      item.type,
+      item.memo,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
       if (!haystack.includes(search)) {
         return false;

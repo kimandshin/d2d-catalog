@@ -17,6 +17,10 @@ const inStockOnlyEl = document.getElementById("inStockOnly");
 const favoritesOnlyEl = document.getElementById("favoritesOnly");
 const messageBarEl = document.getElementById("messageBar");
 const viewListBtn = document.getElementById("viewListBtn");
+const imageModalEl = document.getElementById("imageModal");
+const imageModalImg = document.getElementById("imageModalImg");
+const imageModalCaption = document.getElementById("imageModalCaption");
+const imageModalCloseBtn = document.getElementById("imageModalClose");
 
 // Modals
 const priceModalEl = document.getElementById("priceModal");
@@ -97,53 +101,46 @@ function attachEventListeners() {
   });
 
   // Product list click handlers (event delegation)
-  productListEl.addEventListener("click", (e) => {
-    const cardEl = e.target.closest(".product-card");
-    if (!cardEl) return;
-    const itemId = cardEl.getAttribute("data-item-id");
-    const item = catalog.find((p) => String(p.itemId) === String(itemId));
-    if (!item) return;
+productListEl.addEventListener("click", (e) => {
+  const cardEl = e.target.closest(".product-card");
+  if (!cardEl) return;
 
-    if (e.target.closest(".favorite-btn")) {
-      toggleFavorite(item.itemId);
-      renderCatalog();
-      return;
-    }
+  const itemId = cardEl.getAttribute("data-item-id");
+  const item = catalog.find((p) => String(p.itemId) === String(itemId));
+  if (!item) return;
 
-    if (e.target.closest(".ask-price-btn")) {
-      openPriceModal(item);
-      return;
-    }
-
-    if (e.target.closest(".edit-request-btn")) {
-      openEditModal(item);
-      return;
-    }
-
-    if (e.target.closest(".add-to-list-btn")) {
-      addToFavoritesFromCard(item);
-      return;
-    }
-  });
-}
-
-/* Loading & Messages */
-
-function setMessage(text, type = "info", timeoutMs = 3000) {
-  if (!text) {
-    messageBarEl.classList.add("hidden");
+  // CLICK ON PRODUCT IMAGE → open full-size in new tab
+  const imgEl = e.target.closest(".product-img-clickable");
+  if (imgEl && imgEl.dataset.fullUrl) {
+    window.open(imgEl.dataset.fullUrl, "_blank");
     return;
   }
-  messageBarEl.textContent = text;
-  messageBarEl.classList.remove("hidden", "info", "error");
-  messageBarEl.classList.add(type);
-  if (timeoutMs > 0) {
-    setTimeout(() => {
-      messageBarEl.classList.add("hidden");
-    }, timeoutMs);
-  }
-}
 
+  // FAVORITE BUTTON
+  if (e.target.closest(".favorite-btn")) {
+    toggleFavorite(item.itemId);
+    renderCatalog();
+    return;
+  }
+
+  // ASK FOR PRICE BUTTON
+  if (e.target.closest(".ask-price-btn")) {
+    openPriceModal(item);
+    return;
+  }
+
+  // EDIT REQUEST BUTTON
+  if (e.target.closest(".edit-request-btn")) {
+    openEditModal(item);
+    return;
+  }
+
+  // ADD TO FAVORITES LIST BUTTON
+  if (e.target.closest(".add-to-list-btn")) {
+    addToFavoritesFromCard(item);
+    return;
+  }
+});
 /* Fetch catalog */
 
 async function fetchCatalog() {
@@ -298,11 +295,14 @@ function renderCatalog() {
           ? descShort + "…"
           : descShort;
 
-      const imageHtml = item.pictureUrl
-        ? `<img src="${escapeHtml(item.pictureUrl)}" alt="${escapeHtml(
-            item.productName || ""
-          )}" />`
-        : `<div class="product-thumb-fallback">📦</div>`;
+       const imageHtml = item.pictureUrl
+    ? `<img 
+         src="${escapeHtml(item.pictureUrl)}" 
+         alt="${escapeHtml(item.productName || "")}"
+         class="product-img-clickable"
+         data-full-url="${escapeHtml(item.pictureUrl)}"
+       />`
+    : `<div class="product-thumb-fallback">📦</div>`;
 
       return `
         <article class="product-card" data-item-id="${escapeHtml(
@@ -420,6 +420,29 @@ function addToFavoritesFromCard(item) {
 }
 
 /* Modals */
+
+function openImageModal(url, caption) {
+  if (!url) return;
+  imageModalImg.src = url;
+  imageModalCaption.textContent = caption || "";
+  imageModalEl.classList.remove("hidden");
+}
+
+function closeImageModal() {
+  imageModalEl.classList.add("hidden");
+  imageModalImg.src = "";
+}
+
+if (imageModalCloseBtn) {
+  imageModalCloseBtn.addEventListener("click", closeImageModal);
+}
+if (imageModalEl) {
+  imageModalEl.addEventListener("click", (e) => {
+    if (e.target === imageModalEl || e.target.classList.contains("modal-backdrop")) {
+      closeImageModal();
+    }
+  });
+}
 
 function openModal(el) {
   el.classList.remove("hidden");

@@ -506,6 +506,28 @@ body {
 
 /* MODALS */
 
+
+.image-modal-content {
+  max-width: min(480px, 90vw);
+  padding: 12px;
+  background: rgba(10, 12, 20, 0.96);
+  border-radius: 20px;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.7);
+}
+
+#imageModalImg {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.image-modal-caption {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

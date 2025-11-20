@@ -732,13 +732,14 @@ function setMessage(text, type = "info", timeout = 3000) {
 
 // Secret admin shortcut: press CTRL + SHIFT + 1
 document.addEventListener('keydown', function(e) {
-  const isCtrl  = e.ctrlKey;                // Control key
-  const isShift = e.shiftKey;              // Shift key
-  const key     = e.key;                   // '1' or '!' depending on browser
+  const isCtrl  = e.ctrlKey;
+  const isShift = e.shiftKey;
+  const key     = e.key; // '1' or '!' depending on browser
 
   const isOneKey = (key === '1' || key === '!');
 
   if (isCtrl && isShift && isOneKey) {
+    // For now this can go to admin.html or directly to the Apps Script admin UI
     window.location.href = 'admin.html';
   }
 });

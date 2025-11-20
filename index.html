@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+    <a href="#" onclick="openAdmin(event)"
+       style="position:fixed; top:10px; left:12px; font-size:11px; opacity:0.35; color:#fff; text-decoration:none; z-index:9999;">
+      Admin
+    </a>
   <div class="app-shell">
     <header class="app-header">
       <div>
@@ -16,7 +20,6 @@
       <button id="viewListBtn" class="btn btn-accent">
         View &amp; Save Favorites
       </button>
-       <div> <a href="#" onclick="openAdmin(event)">Admin</a> </div>
     </header>
 
     <section class="controls">
@@ -224,15 +227,24 @@
   </div>
 </div>
   <script>
-  function openAdmin(e) {
-    e.preventDefault();
-    var pwd = prompt('Enter admin password:');
-    if (pwd === '@drop2drop.com') {
-      window.location.href = 'https://script.google.com/a/macros/drop2drop.com/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec?action=adminUI';
-    } else if (pwd !== null) {
-      alert('Incorrect password.');
-    }
-  }
-</script>
+    // Password-protected redirect
+      function openAdmin(e) {
+        e.preventDefault();
+        var pwd = prompt('Enter admin password:');
+        if (pwd === '1225') {
+          window.location.href =
+            'https://script.google.com/a/macros/drop2drop.com/s/AKfycbxH0bLS6ReVtCqwGKtbAOvILrOFnO2o48r3FNiZpbhYcGnw1iKW_eMIYklBTMFVofoMCw/exec?action=adminUI';
+        } else if (pwd !== null) {
+          alert('Incorrect password.');
+        }
+      }
+    
+      // Secret shortcut: Shift + 6 ( ^ )
+      document.addEventListener('keydown', function(e) {
+        // e.key === '^' on some keyboards, '6' on others
+        if (e.shiftKey && (e.key === '6' || e.key === '^')) {
+          openAdmin(e);
+        }
+      });
 </body>
 </html>

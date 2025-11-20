@@ -222,6 +222,16 @@
     <div id="imageModalCaption" class="image-modal-caption"></div>
   </div>
 </div>
-  
+  <script>
+  function openAdmin(e) {
+    e.preventDefault();
+    var pwd = prompt('Enter admin password:');
+    if (pwd === '@drop2drop.com') {
+      window.location.href = 'https://script.google.com/a/macros/drop2drop.com/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec?action=adminUI';
+    } else if (pwd !== null) {
+      alert('Incorrect password.');
+    }
+  }
+</script>
 </body>
 </html>

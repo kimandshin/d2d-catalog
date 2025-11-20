@@ -1,5 +1,5 @@
 // 🔗 Replace this with your actual Apps Script Web App URL
-const API_URL = "https://script.google.com/macros/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxMWT5DmXFVb8JSJsDN6KzRzc4Zzim5mryiF9bQmc5AoC89ptSN96PDM1Pmkk6xdz07Bg/exec";
 
 // In-memory state
 let catalog = [];

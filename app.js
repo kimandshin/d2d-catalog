@@ -15,6 +15,7 @@ const searchInputEl = document.getElementById("searchInput");
 const typeFilterEl = document.getElementById("typeFilter");
 const inStockOnlyEl = document.getElementById("inStockOnly");
 const favoritesOnlyEl = document.getElementById("favoritesOnly");
+const clearFavoritesBtn = document.getElementById("clearFavoritesBtn");
 const messageBarEl = document.getElementById("messageBar");
 const viewListBtn = document.getElementById("viewListBtn");
 const imageModalEl = document.getElementById("imageModal");
@@ -63,6 +64,17 @@ function attachEventListeners() {
   favoritesOnlyEl.addEventListener("change", () => applyFiltersAndRender());
   viewListBtn.addEventListener("click", openListModal);
 
+    if (clearFavoritesBtn) {
+    clearFavoritesBtn.addEventListener("click", () => {
+      if (!favorites.size) {
+        setMessage("No favorites to clear.", "info", 2000);
+        return;
+      }
+      if (!confirm("Clear all favorite items?")) return;
+      clearFavorites();
+      });
+    }
+  
   // Close modal buttons
   document.querySelectorAll("[data-close-modal]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -357,6 +369,13 @@ function renderCatalog() {
 }
 
 /* Favorites */
+
+function clearFavorites() {
+  favorites.clear();
+  saveFavoritesToStorage();
+  setMessage("All favorites cleared.", "info", 2000);
+  applyFiltersAndRender();
+}
 
 function loadFavoritesFromStorage() {
   try {
@@ -692,16 +711,3 @@ function setMessage(text, type = "info", timeout = 3000) {
   }
 }
 
-// Secret admin shortcut: press SHIFT + 6 ( ^ )
-document.addEventListener('keydown', function(e) {
-  // We only want plain Shift (no Ctrl/Cmd/Alt)
-  if (!e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
-
-  const key = e.key;   // usually '6' or '^' when Shift+6 is pressed
-  const isSix = (key === '6' || key === '^');
-
-  if (isSix) {
-    window.location.href =
-      'https://script.google.com/a/macros/drop2drop.com/s/AKfycbxH0bLS6ReVtCqwGKtbAOvILrOFnO2o48r3FNiZpbhYcGnw1iKW_eMIYklBTMFVofoMCw/exec?action=adminUI';
-  }
-});

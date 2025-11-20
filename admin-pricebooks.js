@@ -1,5 +1,5 @@
 // Replace with your deployed Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/YOUR_WEB_APP_ID/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec';
 
 // Simple front-end password (visual only).
 // Real protection is from Google auth on the Apps Script side.

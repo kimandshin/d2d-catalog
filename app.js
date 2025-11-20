@@ -1,5 +1,5 @@
 // 🔗 Replace this with your actual Apps Script Web App URL
-const API_URL = "https://script.google.com/macros/s/AKfycbzjWDM1HpUkhhlqy4I-xGcrlyE0-Ai2ithC8wpxkiqHhYz8Rs2F9xXkjbZo5ZIkdBOWYw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec";
 
 // In-memory state
 let catalog = [];
@@ -58,21 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function attachEventListeners() {
-  searchInputEl.addEventListener("input", () => {
-    applyFiltersAndRender();
-  });
-
-  inStockOnlyEl.addEventListener("change", () => {
-    applyFiltersAndRender();
-  });
-
-  favoritesOnlyEl.addEventListener("change", () => {
-    applyFiltersAndRender();
-  });
-
-  viewListBtn.addEventListener("click", () => {
-    openListModal();
-  });
+  searchInputEl.addEventListener("input", () => applyFiltersAndRender());
+  inStockOnlyEl.addEventListener("change", () => applyFiltersAndRender());
+  favoritesOnlyEl.addEventListener("change", () => applyFiltersAndRender());
+  viewListBtn.addEventListener("click", openListModal);
 
   // Close modal buttons
   document.querySelectorAll("[data-close-modal]").forEach((btn) => {
@@ -82,58 +71,49 @@ function attachEventListeners() {
     });
   });
 
-  // Price form submit
-  priceFormEl.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await submitPriceRequest();
-  });
+  // Submit handlers
+  priceFormEl.addEventListener("submit", (e) => { e.preventDefault(); submitPriceRequest(); });
+  listFormEl.addEventListener("submit", (e) => { e.preventDefault(); submitSaveList(); });
+  editFormEl.addEventListener("submit", (e) => { e.preventDefault(); submitEditRequest(); });
 
-  // List form submit
-  listFormEl.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await submitSaveList();
-  });
+  // PRODUCT LIST CLICK (DELEGATION)
+  productListEl.addEventListener("click", (e) => {
+    const cardEl = e.target.closest(".product-card");
+    if (!cardEl) return;
 
-  // Edit form submit
-  editFormEl.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await submitEditRequest();
-  });
+    const itemId = cardEl.getAttribute("data-item-id");
+    const item = catalog.find((p) => String(p.itemId) === String(itemId));
+    if (!item) return;
 
-
-    // CLICK ON PRODUCT IMAGE → open full-size in new tab
+    // Image click → open full image
     const imgEl = e.target.closest(".product-img-clickable");
     if (imgEl && imgEl.dataset.fullUrl) {
       window.open(imgEl.dataset.fullUrl, "_blank");
       return;
     }
 
-    // FAVORITE BUTTON
     if (e.target.closest(".favorite-btn")) {
       toggleFavorite(item.itemId);
       renderCatalog();
       return;
     }
 
-    // ASK FOR PRICE BUTTON
     if (e.target.closest(".ask-price-btn")) {
       openPriceModal(item);
       return;
     }
 
-    // EDIT REQUEST BUTTON
     if (e.target.closest(".edit-request-btn")) {
       openEditModal(item);
       return;
     }
 
-    // ADD TO FAVORITES LIST BUTTON
     if (e.target.closest(".add-to-list-btn")) {
       addToFavoritesFromCard(item);
       return;
     }
   });
-} // 👈 this closes function attachEventListeners
+} // END attachEventListeners
 
 /* Fetch catalog */
 

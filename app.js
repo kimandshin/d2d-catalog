@@ -730,16 +730,16 @@ function setMessage(text, type = "info", timeout = 3000) {
   }
 }
 
-// Secret admin shortcut: press CTRL + SHIFT + 1
+// Secret admin shortcut: press SHIFT + 6 ( ^ )
 document.addEventListener('keydown', function(e) {
-  const isCtrl  = e.ctrlKey;
-  const isShift = e.shiftKey;
-  const key     = e.key; // '1' or '!' depending on browser
+  // We only want plain Shift (no Ctrl/Cmd/Alt)
+  if (!e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
 
-  const isOneKey = (key === '1' || key === '!');
+  const key = e.key;   // usually '6' or '^' when Shift+6 is pressed
+  const isSix = (key === '6' || key === '^');
 
-  if (isCtrl && isShift && isOneKey) {
-    // For now this can go to admin.html or directly to the Apps Script admin UI
-    window.location.href = 'admin.html';
+  if (isSix) {
+    window.location.href =
+      'https://script.google.com/a/macros/drop2drop.com/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec?action=adminUI';
   }
 });

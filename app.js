@@ -101,46 +101,48 @@ function attachEventListeners() {
   });
 
   // Product list click handlers (event delegation)
-productListEl.addEventListener("click", (e) => {
-  const cardEl = e.target.closest(".product-card");
-  if (!cardEl) return;
+  productListEl.addEventListener("click", (e) => {
+    const cardEl = e.target.closest(".product-card");
+    if (!cardEl) return;
 
-  const itemId = cardEl.getAttribute("data-item-id");
-  const item = catalog.find((p) => String(p.itemId) === String(itemId));
-  if (!item) return;
+    const itemId = cardEl.getAttribute("data-item-id");
+    const item = catalog.find((p) => String(p.itemId) === String(itemId));
+    if (!item) return;
 
-  // CLICK ON PRODUCT IMAGE → open full-size in new tab
-  const imgEl = e.target.closest(".product-img-clickable");
-  if (imgEl && imgEl.dataset.fullUrl) {
-    window.open(imgEl.dataset.fullUrl, "_blank");
-    return;
-  }
+    // CLICK ON PRODUCT IMAGE → open full-size in new tab
+    const imgEl = e.target.closest(".product-img-clickable");
+    if (imgEl && imgEl.dataset.fullUrl) {
+      window.open(imgEl.dataset.fullUrl, "_blank");
+      return;
+    }
 
-  // FAVORITE BUTTON
-  if (e.target.closest(".favorite-btn")) {
-    toggleFavorite(item.itemId);
-    renderCatalog();
-    return;
-  }
+    // FAVORITE BUTTON
+    if (e.target.closest(".favorite-btn")) {
+      toggleFavorite(item.itemId);
+      renderCatalog();
+      return;
+    }
 
-  // ASK FOR PRICE BUTTON
-  if (e.target.closest(".ask-price-btn")) {
-    openPriceModal(item);
-    return;
-  }
+    // ASK FOR PRICE BUTTON
+    if (e.target.closest(".ask-price-btn")) {
+      openPriceModal(item);
+      return;
+    }
 
-  // EDIT REQUEST BUTTON
-  if (e.target.closest(".edit-request-btn")) {
-    openEditModal(item);
-    return;
-  }
+    // EDIT REQUEST BUTTON
+    if (e.target.closest(".edit-request-btn")) {
+      openEditModal(item);
+      return;
+    }
 
-  // ADD TO FAVORITES LIST BUTTON
-  if (e.target.closest(".add-to-list-btn")) {
-    addToFavoritesFromCard(item);
-    return;
-  }
-});
+    // ADD TO FAVORITES LIST BUTTON
+    if (e.target.closest(".add-to-list-btn")) {
+      addToFavoritesFromCard(item);
+      return;
+    }
+  });
+} // 👈 this closes function attachEventListeners
+
 /* Fetch catalog */
 
 async function fetchCatalog() {

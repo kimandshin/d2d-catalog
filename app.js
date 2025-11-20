@@ -100,14 +100,6 @@ function attachEventListeners() {
     await submitEditRequest();
   });
 
-  // Product list click handlers (event delegation)
-  productListEl.addEventListener("click", (e) => {
-    const cardEl = e.target.closest(".product-card");
-    if (!cardEl) return;
-
-    const itemId = cardEl.getAttribute("data-item-id");
-    const item = catalog.find((p) => String(p.itemId) === String(itemId));
-    if (!item) return;
 
     // CLICK ON PRODUCT IMAGE → open full-size in new tab
     const imgEl = e.target.closest(".product-img-clickable");

@@ -729,3 +729,10 @@ function setMessage(text, type = "info", timeout = 3000) {
     }, timeout);
   }
 }
+
+// Secret admin shortcut: press SHIFT + A
+document.addEventListener('keydown', function(e) {
+  if (e.shiftKey && e.key.toLowerCase() === 'a') {
+    window.location.href = 'admin.html';
+  }
+});

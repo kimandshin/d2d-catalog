@@ -1,5 +1,5 @@
 // Replace with your deployed Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec';
+const API_URL = 'https://script.google.com/a/macros/drop2drop.com/s/AKfycbxH0bLS6ReVtCqwGKtbAOvILrOFnO2o48r3FNiZpbhYcGnw1iKW_eMIYklBTMFVofoMCw/exec';
 
 // Simple front-end password (visual only).
 // Real protection is from Google auth on the Apps Script side.

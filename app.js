@@ -295,14 +295,14 @@ function renderCatalog() {
           ? descShort + "…"
           : descShort;
 
-       const imageHtml = item.pictureUrl
-    ? `<img 
-         src="${escapeHtml(item.pictureUrl)}" 
-         alt="${escapeHtml(item.productName || "")}"
-         class="product-img-clickable"
-         data-full-url="${escapeHtml(item.pictureUrl)}"
-       />`
-    : `<div class="product-thumb-fallback">📦</div>`;
+      const imageHtml = item.pictureUrl
+        ? `<img
+             src="${escapeHtml(item.pictureUrl)}"
+             alt="${escapeHtml(item.productName || "")}"
+             class="product-img-clickable"
+             data-full-url="${escapeHtml(item.pictureUrl)}"
+           />`
+        : `<div class="product-thumb-fallback">📦</div>`;
 
       return `
         <article class="product-card" data-item-id="${escapeHtml(
@@ -381,6 +381,44 @@ function renderCatalog() {
 
   productListEl.innerHTML = html;
 }
+
+// Product list click handlers (event delegation)
+productListEl.addEventListener("click", (e) => {
+  const cardEl = e.target.closest(".product-card");
+  if (!cardEl) return;
+
+  const itemId = cardEl.getAttribute("data-item-id");
+  const item = catalog.find((p) => String(p.itemId) === String(itemId));
+  if (!item) return;
+
+  // Click on product image → open full-size in new tab
+  const imgEl = e.target.closest(".product-img-clickable");
+  if (imgEl && imgEl.dataset.fullUrl) {
+    window.open(imgEl.dataset.fullUrl, "_blank");
+    return;
+  }
+
+  if (e.target.closest(".favorite-btn")) {
+    toggleFavorite(item.itemId);
+    renderCatalog();
+    return;
+  }
+
+  if (e.target.closest(".ask-price-btn")) {
+    openPriceModal(item);
+    return;
+  }
+
+  if (e.target.closest(".edit-request-btn")) {
+    openEditModal(item);
+    return;
+  }
+
+  if (e.target.closest(".add-to-list-btn")) {
+    addToFavoritesFromCard(item);
+    return;
+  }
+});
 
 /* Favorites */
 

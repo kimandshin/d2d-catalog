@@ -732,11 +732,13 @@ function setMessage(text, type = "info", timeout = 3000) {
 
 // Secret admin shortcut: press CTRL + SHIFT + 1
 document.addEventListener('keydown', function(e) {
-  const isCtrl = e.ctrlKey;          // Control key
-  const isShift = e.shiftKey;        // Shift key
-  const isOne = e.key === '1';       // Number key "1"
+  const isCtrl  = e.ctrlKey;                // Control key
+  const isShift = e.shiftKey;              // Shift key
+  const key     = e.key;                   // '1' or '!' depending on browser
 
-  if (isCtrl && isShift && isOne) {
+  const isOneKey = (key === '1' || key === '!');
+
+  if (isCtrl && isShift && isOneKey) {
     window.location.href = 'admin.html';
   }
 });

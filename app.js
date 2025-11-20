@@ -715,3 +715,17 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+function setMessage(text, type = "info", timeout = 3000) {
+  if (!messageBarEl) return;
+
+  messageBarEl.textContent = text || "";
+  messageBarEl.className = "message-bar " + type; // type = info / error / success
+  messageBarEl.classList.remove("hidden");
+
+  if (timeout > 0) {
+    setTimeout(() => {
+      messageBarEl.classList.add("hidden");
+    }, timeout);
+  }
+}

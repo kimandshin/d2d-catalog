@@ -730,9 +730,13 @@ function setMessage(text, type = "info", timeout = 3000) {
   }
 }
 
-// Secret admin shortcut: press SHIFT + A
+// Secret admin shortcut: press CTRL + SHIFT + 1
 document.addEventListener('keydown', function(e) {
-  if (e.shiftKey && e.key.toLowerCase() === 'a') {
+  const isCtrl = e.ctrlKey;          // Control key
+  const isShift = e.shiftKey;        // Shift key
+  const isOne = e.key === '1';       // Number key "1"
+
+  if (isCtrl && isShift && isOne) {
     window.location.href = 'admin.html';
   }
 });

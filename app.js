@@ -740,6 +740,6 @@ document.addEventListener('keydown', function(e) {
 
   if (isSix) {
     window.location.href =
-      'https://script.google.com/a/macros/drop2drop.com/s/AKfycbwBT4wcGqFon1o91it64zBptNLwdk8mDOxmXSUCP4ok-yTKZJnIdWUbyICC6J1_sjxJWQ/exec?action=adminUI';
+      'https://script.google.com/a/macros/drop2drop.com/s/AKfycbxH0bLS6ReVtCqwGKtbAOvILrOFnO2o48r3FNiZpbhYcGnw1iKW_eMIYklBTMFVofoMCw/exec?action=adminUI';
   }
 });

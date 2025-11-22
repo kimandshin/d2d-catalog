@@ -22,52 +22,58 @@
       </button>
     </header>
 
-    <section class="controls">
-      <div class="search-container">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search by name, SKU, dimension, type..."
-        />
+<section class="controls">
+  <!-- 🔝 Sticky bar: search + toggles only -->
+  <div class="top-bar-sticky">
+    <div class="search-container">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search by name, SKU, dimension, type..."
+      />
+    </div>
+
+    <div class="filters-row switches-row">
+      <div class="filter-group small">
+        <label class="switch">
+          <input type="checkbox" id="inStockOnly" />
+          <span class="switch-slider"></span>
+        </label>
+        <span class="switch-label">In stock only</span>
       </div>
 
-      <div class="filters-row">
-        <div class="filter-group">
-          <label class="filter-label">Type</label>
-          <div id="typeFilter" class="type-filter"></div>
-        </div>
-
-        <div class="filter-group small">
-          <label class="switch">
-            <input type="checkbox" id="inStockOnly" />
-            <span class="switch-slider"></span>
-          </label>
-          <span class="switch-label">In stock only</span>
-        </div>
-        
-        <div class="filter-group small">
-          <label class="switch">
-            <input type="checkbox" id="dabokeyToggle" />
-            <span class="switch-slider"></span>
-          </label>
-          <span class="switch-label">Dabokey</span>
-        </div>
-        
-        <div class="filter-group small">
-          <button type="button" id="clearFavoritesBtn" class="btn btn-ghost">
-            Clear favorites
-          </button>
-        </div>
-
-        <div class="filter-group small">
-          <label class="switch">
-            <input type="checkbox" id="favoritesOnly" />
-            <span class="switch-slider"></span>
-          </label>
-          <span class="switch-label">Favorites only</span>
-        </div>
+      <div class="filter-group small">
+        <label class="switch">
+          <input type="checkbox" id="dabokeyToggle" />
+          <span class="switch-slider"></span>
+        </label>
+        <span class="switch-label">Dabokey</span>
       </div>
-    </section>
+
+      <div class="filter-group small">
+        <button type="button" id="clearFavoritesBtn" class="btn btn-ghost">
+          Clear favorites
+        </button>
+      </div>
+
+      <div class="filter-group small">
+        <label class="switch">
+          <input type="checkbox" id="favoritesOnly" />
+          <span class="switch-slider"></span>
+        </label>
+        <span class="switch-label">Favorites only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⬇️ Non-sticky type chips -->
+  <div class="filters-row type-row">
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <div id="typeFilter" class="type-filter"></div>
+    </div>
+  </div>
+</section>
 
     <section id="messageBar" class="message-bar hidden"></section>
 

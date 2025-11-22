@@ -23,6 +23,31 @@ const imageModalImg = document.getElementById("imageModalImg");
 const imageModalCaption = document.getElementById("imageModalCaption");
 const imageModalCloseBtn = document.getElementById("imageModalClose");
 
+const state = {
+  products: [],
+  filteredProducts: [],
+  favorites: new Set(),
+  filters: {
+    search: "",
+    category: "ALL",
+    inStockOnly: false,
+    showAllSuppliers: false // false = hide items with no Supplier (default)
+  }
+};
+
+const dabokeyToggle = document.getElementById("dabokeyToggle");
+
+if (dabokeyToggle) {
+  // Default: unchecked → hide items with no Supplier
+  dabokeyToggle.checked = false;
+
+  dabokeyToggle.addEventListener("change", () => {
+    // When checked: show all (ignore Supplier filter)
+    state.filters.showAllSuppliers = dabokeyToggle.checked;
+    applyFiltersAndRender();
+  });
+}
+
 // Modals
 const priceModalEl = document.getElementById("priceModal");
 const priceFormEl = document.getElementById("priceForm");
@@ -64,7 +89,7 @@ function attachEventListeners() {
   favoritesOnlyEl.addEventListener("change", () => applyFiltersAndRender());
   viewListBtn.addEventListener("click", openListModal);
 
-    if (clearFavoritesBtn) {
+  if (clearFavoritesBtn) {
     clearFavoritesBtn.addEventListener("click", () => {
       if (!favorites.size) {
         setMessage("No favorites to clear.", "info", 2000);
@@ -72,9 +97,9 @@ function attachEventListeners() {
       }
       if (!confirm("Clear all favorite items?")) return;
       clearFavorites();
-      });
-    }
-  
+    });
+  }
+
   // Close modal buttons
   document.querySelectorAll("[data-close-modal]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -201,30 +226,40 @@ function applyFiltersAndRender() {
   const search = (searchInputEl.value || "").toLowerCase().trim();
   const inStockOnly = inStockOnlyEl.checked;
   const favoritesOnly = favoritesOnlyEl.checked;
+  const showAllSuppliers =
+    state && state.filters ? !!state.filters.showAllSuppliers : false;
 
   filteredCatalog = catalog.filter((item) => {
-    // Search filter (now includes description)
+    // 0) Supplier filter (default: hide items with blank Supplier)
+    if (!showAllSuppliers) {
+      const supplierVal = (item.supplier == null ? "" : String(item.supplier)).trim();
+      if (!supplierVal) {
+        return false;
+      }
+    }
+
+    // 1) Search filter (includes multiple fields)
     if (search) {
-     const haystack = [
-      item.productName,
-      item.description,
-      item.supplier,    // ✅ new line
-      item.sku,
-      item.dimension,
-      item.volume,
-      item.type,
-      item.memo,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+      const haystack = [
+        item.productName,
+        item.description,
+        item.supplier,
+        item.sku,
+        item.dimension,
+        item.volume,
+        item.type,
+        item.memo,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
       if (!haystack.includes(search)) {
         return false;
       }
     }
 
-    // Type filter (multi-select)
+    // 2) Type filter (multi-select)
     if (selectedTypes.size > 0) {
       const itemTypes = new Set(item.types || []);
       let hasMatch = false;
@@ -234,13 +269,13 @@ function applyFiltersAndRender() {
       if (!hasMatch) return false;
     }
 
-    // In stock
+    // 3) In stock
     if (inStockOnly) {
       const stockVal = Number(item.stock || 0);
       if (!(stockVal > 0)) return false;
     }
 
-    // Favorites only
+    // 4) Favorites only
     if (favoritesOnly) {
       if (!favorites.has(String(item.itemId))) return false;
     }
@@ -503,16 +538,16 @@ async function submitPriceRequest() {
   try {
     setMessage("Sending price request...", "info", 0);
     await fetch(API_URL, {
-  method: "POST",
-  mode: "no-cors",
-  headers: {
-    "Content-Type": "text/plain;charset=utf-8",
-  },
-  body: JSON.stringify(payload),
-});
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload),
+    });
 
-// We can’t read the response in no-cors mode, but Apps Script will run.
-setMessage("Price request sent. David will contact you soon.", "info", 5000);
+    // We can’t read the response in no-cors mode, but Apps Script will run.
+    setMessage("Price request sent. David will contact you soon.", "info", 5000);
     closeModal(priceModalEl);
   } catch (err) {
     console.error(err);
@@ -620,25 +655,25 @@ async function submitSaveList() {
   try {
     setMessage("Saving list...", "info", 0);
     await fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify(payload),
-  });
-  
-  setMessage(
-    "List saved and sent. David will review it shortly.",
-    "info",
-    5000
-  );
-  closeModal(listModalEl);
-    } catch (err) {
-      console.error(err);
-      setMessage("Failed to save list: " + err.message, "error", 6000);
-    }
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    setMessage(
+      "List saved and sent. David will review it shortly.",
+      "info",
+      5000
+    );
+    closeModal(listModalEl);
+  } catch (err) {
+    console.error(err);
+    setMessage("Failed to save list: " + err.message, "error", 6000);
   }
+}
 
 /* Edit Modal */
 
@@ -665,21 +700,21 @@ async function submitEditRequest() {
 
   try {
     setMessage("Sending edit request...", "info", 0);
-   await fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify(payload),
-  });
-  
-  setMessage(
-    "Edit request submitted. David will review this item.",
-    "info",
-    5000
-  );
-  closeModal(editModalEl);
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    setMessage(
+      "Edit request submitted. David will review this item.",
+      "info",
+      5000
+    );
+    closeModal(editModalEl);
   } catch (err) {
     console.error(err);
     setMessage("Failed to submit edit request: " + err.message, "error", 6000);
@@ -710,4 +745,3 @@ function setMessage(text, type = "info", timeout = 3000) {
     }, timeout);
   }
 }
-

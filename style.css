@@ -41,7 +41,7 @@ body {
 
 .app-shell {
   max-width: 1120px;
-  margin: 72px auto 40px; /* was 24px; adjust if you want tighter */
+  margin: 24px auto 40px; /* if you changed this to 72px earlier, revert it */
   padding: 0 16px;
 }
 
@@ -103,30 +103,38 @@ body {
   margin-bottom: 16px;
 }
 
-/* 🔝 Fixed bar: search + switches */
-.top-bar-fixed {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  padding: 8px 16px 10px;
+/* 🔝 Sticky bar: search + switches + Admin */
+.top-bar-sticky {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px); /* respects iPhone notch/status bar */
+  z-index: 30;
+  padding: 8px 0 10px;
   background: radial-gradient(circle at top, #141929 0, #050608 60%, #020206 100%);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
 
-/* Keep switches nicely aligned in fixed bar */
+/* Keep switches nicely aligned in sticky bar */
 .switches-row {
   margin-top: 6px;
   align-items: center;
 }
 
-/* Slight spacing between fixed bar and type chips (which scroll) */
+/* Slight spacing between sticky bar and type chips */
 .type-row {
-  margin-top: 80px; /* pushes type chips down below the fixed bar */
+  margin-top: 4px;
 }
 
+/* Admin button style (small, subtle) */
+.admin-btn {
+  padding-inline: 10px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.admin-btn:hover {
+  opacity: 1;
+}
 .search-container {
   position: relative;
 }

@@ -8,7 +8,7 @@
 </head>
 <body>
      <div class="app-shell">
-    <header class="app-header">
+       <header class="app-header">
       <div>
         <h1>D2D Product Catalog</h1>
         <p class="subtitle">Browse products, save favorites, and request prices.</p>
@@ -18,69 +18,69 @@
       </button>
     </header>
 
-<section class="controls">
-  <!-- 🔝 Sticky: search + switches + Admin -->
-  <div class="top-bar-sticky">
-    <div class="search-container">
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search by name, SKU, dimension, type..."
-      />
+    <!-- 🔝 Sticky toolbar: search + switches + Admin -->
+    <div class="toolbar-sticky">
+      <div class="search-container">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search by name, SKU, dimension, type..."
+        />
+      </div>
+
+      <div class="filters-row switches-row">
+        <div class="filter-group small">
+          <label class="switch">
+            <input type="checkbox" id="inStockOnly" />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="switch-label">In stock only</span>
+        </div>
+        
+        <div class="filter-group small">
+          <label class="switch">
+            <input type="checkbox" id="dabokeyToggle" />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="switch-label">Dabokey</span>
+        </div>
+        
+        <div class="filter-group small">
+          <button type="button" id="clearFavoritesBtn" class="btn btn-ghost">
+            Clear favorites
+          </button>
+        </div>
+
+        <div class="filter-group small">
+          <label class="switch">
+            <input type="checkbox" id="favoritesOnly" />
+            <span class="switch-slider"></span>
+          </label>
+          <span class="switch-label">Favorites only</span>
+        </div>
+
+        <!-- Admin button sits here -->
+        <div class="filter-group small">
+          <button
+            type="button"
+            class="btn btn-ghost admin-btn"
+            onclick="openAdmin(event)"
+          >
+            Admin
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="filters-row switches-row">
-      <div class="filter-group small">
-        <label class="switch">
-          <input type="checkbox" id="inStockOnly" />
-          <span class="switch-slider"></span>
-        </label>
-        <span class="switch-label">In stock only</span>
+    <!-- ⬇️ Non-sticky TYPE row only -->
+    <section class="controls">
+      <div class="filters-row type-row">
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <div id="typeFilter" class="type-filter"></div>
+        </div>
       </div>
-      
-      <div class="filter-group small">
-        <label class="switch">
-          <input type="checkbox" id="dabokeyToggle" />
-          <span class="switch-slider"></span>
-        </label>
-        <span class="switch-label">Dabokey</span>
-      </div>
-      
-      <div class="filter-group small">
-        <button type="button" id="clearFavoritesBtn" class="btn btn-ghost">
-          Clear favorites
-        </button>
-      </div>
-
-      <div class="filter-group small">
-        <label class="switch">
-          <input type="checkbox" id="favoritesOnly" />
-          <span class="switch-slider"></span>
-        </label>
-        <span class="switch-label">Favorites only</span>
-      </div>
-
-      <!-- ⭐ Admin button in the same row -->
-      <div class="filter-group small">
-        <button
-          type="button"
-          class="btn btn-ghost admin-btn"
-          onclick="openAdmin(event)"
-        >
-          Admin
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ⬇️ Non-sticky type chips -->
-  <div class="filters-row type-row">
-    <div class="filter-group">
-      <label class="filter-label">Type</label>
-      <div id="typeFilter" class="type-filter"></div>
-    </div>
-  </div>
-</section>
+    </section>
 
     <section id="messageBar" class="message-bar hidden"></section>
 

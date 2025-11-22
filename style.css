@@ -77,36 +77,11 @@ body {
 
 /* CONTROLS */
 
-/* Sticky top bar: search + switches */
-.top-bar-sticky {
+
+/* 🔝 Sticky toolbar under the header */
+.toolbar-sticky {
   position: sticky;
-  top: 0;
-  z-index: 40;
-  padding: 8px 0 10px;
-  background: radial-gradient(circle at top, #141929 0, #050608 60%, #020206 100%);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-/* Slight spacing between sticky bar and type chips */
-.type-row {
-  margin-top: 4px;
-}
-
-/* Keep switches row nicely aligned in sticky bar */
-.switches-row {
-  margin-top: 6px;
-  align-items: center;
-}
-
-.controls {
-  margin-bottom: 16px;
-}
-
-/* 🔝 Sticky bar: search + switches + Admin */
-.top-bar-sticky {
-  position: sticky;
-  top: env(safe-area-inset-top, 0px); /* respects iPhone notch/status bar */
+  top: 0; /* sits right under the browser status bar */
   z-index: 30;
   padding: 8px 0 10px;
   background: radial-gradient(circle at top, #141929 0, #050608 60%, #020206 100%);
@@ -114,18 +89,18 @@ body {
   -webkit-backdrop-filter: blur(18px);
 }
 
-/* Keep switches nicely aligned in sticky bar */
+/* Switch row inside toolbar */
 .switches-row {
   margin-top: 6px;
   align-items: center;
 }
 
-/* Slight spacing between sticky bar and type chips */
+/* Small gap between toolbar and TYPE chips */
 .type-row {
   margin-top: 4px;
 }
 
-/* Admin button style (small, subtle) */
+/* Admin button styling */
 .admin-btn {
   padding-inline: 10px;
   font-size: 0.75rem;

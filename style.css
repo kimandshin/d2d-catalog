@@ -77,6 +77,28 @@ body {
 
 /* CONTROLS */
 
+/* Sticky top bar: search + switches */
+.top-bar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 8px 0 10px;
+  background: radial-gradient(circle at top, #141929 0, #050608 60%, #020206 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Slight spacing between sticky bar and type chips */
+.type-row {
+  margin-top: 4px;
+}
+
+/* Keep switches row nicely aligned in sticky bar */
+.switches-row {
+  margin-top: 6px;
+  align-items: center;
+}
+
 .controls {
   margin-bottom: 16px;
   display: flex;

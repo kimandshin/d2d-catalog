@@ -38,12 +38,10 @@ const state = {
 const dabokeyToggle = document.getElementById("dabokeyToggle");
 
 if (dabokeyToggle) {
-  // Default: unchecked → hide items with no Supplier
+  // Default: OFF → hide items with no Supplier
   dabokeyToggle.checked = false;
 
   dabokeyToggle.addEventListener("change", () => {
-    // When checked: show all (ignore Supplier filter)
-    state.filters.showAllSuppliers = dabokeyToggle.checked;
     applyFiltersAndRender();
   });
 }
@@ -226,19 +224,25 @@ function applyFiltersAndRender() {
   const search = (searchInputEl.value || "").toLowerCase().trim();
   const inStockOnly = inStockOnlyEl.checked;
   const favoritesOnly = favoritesOnlyEl.checked;
-  const showAllSuppliers =
-    state && state.filters ? !!state.filters.showAllSuppliers : false;
+  const showAllSuppliers = dabokeyToggle ? dabokeyToggle.checked : false;
 
   filteredCatalog = catalog.filter((item) => {
-    // 0) Supplier filter (default: hide items with blank Supplier)
+    // 0) Supplier filter (default: hide items with no supplier)
     if (!showAllSuppliers) {
-      const supplierVal = (item.supplier == null ? "" : String(item.supplier)).trim();
-      if (!supplierVal) {
+      // Try several possible supplier fields just in case backend uses a different key
+      const supplierCandidate =
+        (item.supplier != null && String(item.supplier).trim()) ||
+        (item.Supplier != null && String(item.Supplier).trim()) ||
+        (item.supplierName != null && String(item.supplierName).trim()) ||
+        (item.SupplierName != null && String(item.SupplierName).trim());
+
+      if (!supplierCandidate) {
+        // Nothing in any supplier-like field → hide
         return false;
       }
     }
 
-    // 1) Search filter (includes multiple fields)
+    // 1) Search filter
     if (search) {
       const haystack = [
         item.productName,

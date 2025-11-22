@@ -7,11 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <a href="#" onclick="openAdmin(event)"
-       style="position:fixed; top:10px; left:12px; font-size:11px; opacity:0.35; color:#fff; text-decoration:none; z-index:9999;">
-      Admin
-    </a>
-  <div class="app-shell">
+     <div class="app-shell">
     <header class="app-header">
       <div>
         <h1>D2D Product Catalog</h1>
@@ -23,8 +19,8 @@
     </header>
 
 <section class="controls">
-  <!-- 🔝 Fixed: search + switches -->
-  <div class="top-bar-fixed">
+  <!-- 🔝 Sticky: search + switches + Admin -->
+  <div class="top-bar-sticky">
     <div class="search-container">
       <input
         id="searchInput"
@@ -63,10 +59,21 @@
         </label>
         <span class="switch-label">Favorites only</span>
       </div>
+
+      <!-- ⭐ Admin button in the same row -->
+      <div class="filter-group small">
+        <button
+          type="button"
+          class="btn btn-ghost admin-btn"
+          onclick="openAdmin(event)"
+        >
+          Admin
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- ⬇️ Non-fixed type chips -->
+  <!-- ⬇️ Non-sticky type chips -->
   <div class="filters-row type-row">
     <div class="filter-group">
       <label class="filter-label">Type</label>

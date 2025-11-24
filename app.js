@@ -18,6 +18,7 @@ const favoritesOnlyEl = document.getElementById("favoritesOnly");
 const clearFavoritesBtn = document.getElementById("clearFavoritesBtn");
 const messageBarEl = document.getElementById("messageBar");
 const viewListBtn = document.getElementById("viewListBtn");
+const quickSaveBtn = document.getElementById("quickSaveBtn"); 
 const imageModalEl = document.getElementById("imageModal");
 const imageModalImg = document.getElementById("imageModalImg");
 const imageModalCaption = document.getElementById("imageModalCaption");
@@ -86,6 +87,11 @@ function attachEventListeners() {
   inStockOnlyEl.addEventListener("change", () => applyFiltersAndRender());
   favoritesOnlyEl.addEventListener("change", () => applyFiltersAndRender());
   viewListBtn.addEventListener("click", openListModal);
+
+  
+  if (quickSaveBtn) {
+    quickSaveBtn.addEventListener("click", handleQuickSave);   
+  }
 
   if (clearFavoritesBtn) {
     clearFavoritesBtn.addEventListener("click", () => {
@@ -560,6 +566,168 @@ async function submitPriceRequest() {
 }
 
 /* List Modal */
+
+function handleQuickSave() {
+  // 1) Get favorite items using the same logic as openListModal()
+  const favItems = catalog.filter((item) =>
+    favorites.has(String(item.itemId))
+  );
+
+  if (!favItems.length) {
+    setMessage("You have no favorites yet. Add some items first.", "info", 4000);
+    return;
+  }
+
+  // 2) Ask for ANY of: name, phone, or email
+  const contact = prompt("Enter your name, phone number, or email (at least one):");
+
+  if (!contact || !contact.trim()) {
+    setMessage("Quick Save cancelled (no contact info entered).", "info", 4000);
+    return;
+  }
+
+  const contactInfo = contact.trim();
+
+  // 3) Normalize items for sending + PDF view
+  const items = favItems.map((item) => {
+    const uom =
+      item.uom ||
+      item.UOM ||
+      (item.unitsPerBox != null ? String(item.unitsPerBox) : "");
+
+    return {
+      itemId: String(item.itemId),
+      productName: item.productName || "",
+      description: item.description || "",
+      sku: item.sku || "",
+      uom,
+      pictureUrl: item.pictureUrl || ""
+    };
+  });
+
+  const payload = {
+    action: "quickSaveFavorites",
+    contactInfo,
+    items
+  };
+
+  // 4) Fire to Apps Script (same pattern as priceRequest/saveList: no-cors, text/plain)
+  try {
+    setMessage("Saving quick list...", "info", 0);
+    fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+    // We can't read response in no-cors, but Apps Script will run.
+
+    // 5) Open printable window for user
+    openQuickSaveWindow(items);
+    setMessage(
+      "Quick Save sent. David will receive your list by email.",
+      "info",
+      5000
+    );
+  } catch (err) {
+    console.error(err);
+    setMessage("Failed to send quick save: " + err.message, "error", 6000);
+  }
+}
+
+function openQuickSaveWindow(items) {
+  const win = window.open("", "_blank");
+  if (!win) {
+    alert("Pop-up was blocked. Please allow pop-ups and try again.");
+    return;
+  }
+
+  const rowsHtml = items
+    .map((item) => {
+      const pictureLink = item.pictureUrl
+        ? `<a href="${escapeHtml(item.pictureUrl)}" target="_blank">${escapeHtml(item.pictureUrl)}</a>`
+        : "";
+
+      return `
+        <tr>
+          <td>${pictureLink}</td>
+          <td>${escapeHtml(item.productName || "")}</td>
+          <td>
+            ${escapeHtml(item.description || "")}<br>
+            <strong>SKU:</strong> ${escapeHtml(item.sku || "")}<br>
+            <strong>UOM:</strong> ${escapeHtml(item.uom || "")}
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>Quick Saved Items</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 16px;
+          }
+          h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+          }
+          p.subtitle {
+            font-size: 12px;
+            color: #555;
+            margin-top: 0;
+            margin-bottom: 16px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            vertical-align: top;
+            font-size: 12px;
+          }
+          th {
+            background: #f7f7f7;
+          }
+          a {
+            word-break: break-all;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Quick Saved Items</h1>
+        <p class="subtitle">
+          Use your browser's "Print" → "Save as PDF" to download this list.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Picture link</th>
+              <th>Item name</th>
+              <th>Description / SKU / UOM</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
 
 function openListModal() {
   // Build the list of favorite items

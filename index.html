@@ -62,7 +62,7 @@
           <span class="switch-label">Favorites only</span>
         </div>
 
-        <!-- Admin button sits here -->
+        <!-- Admin + D2D Sales buttons -->
         <div class="filter-group small">
           <button
             type="button"
@@ -70,6 +70,13 @@
             onclick="openAdmin(event)"
           >
             Admin
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost admin-btn"
+            onclick="openSales(event)"
+          >
+            D2D Sales
           </button>
         </div>
       </div>
@@ -268,7 +275,13 @@
           alert('Incorrect password.');
         }
       }
-    
+          function openSales(e) {
+        e.preventDefault();
+        window.open(
+          'https://script.google.com/a/macros/drop2drop.com/s/AKfycbz_rJKxXo51whg4b-f2Mz6TW6RoJ2P4V5QlZDuHVwrrC8NcY3bFTODYfrDSMVGCgkdFLQ/exec?action=repUI',
+          '_blank'
+        );
+      }
       // Secret shortcut: Shift + 6 ( ^ )
       document.addEventListener('keydown', function(e) {
         // e.key === '^' on some keyboards, '6' on others

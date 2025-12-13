@@ -335,6 +335,13 @@ function renderCatalog() {
            />`
         : `<div class="product-thumb-fallback">📦</div>`;
 
+            const compatText =
+        item.compatibleItems && item.compatibleItems.length
+          ? `<p class="compat-line">Compatible items: ${item.compatibleItems
+              .map(escapeHtml)
+              .join(", ")}</p>`
+          : "";
+
       return `
         <article class="product-card" data-item-id="${escapeHtml(
           String(item.itemId)
@@ -392,6 +399,7 @@ function renderCatalog() {
                   ? `<div class="product-tags">${typesHtml}</div>`
                   : ""
               }
+              ${compatText}
             </div>
             <div class="product-actions">
               <button type="button" class="btn btn-primary ask-price-btn">

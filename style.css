@@ -403,6 +403,12 @@ body {
   color: var(--fg-muted);
 }
 
+.compat-line {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
 .favorite-btn {
   border-radius: 999px;
   width: 30px;

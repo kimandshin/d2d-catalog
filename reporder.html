@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>D2D Rep Orders</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./style.css"><!-- optional: reuse your catalog CSS -->
+
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -13,9 +13,8 @@
       background: #f5f5f7;
       color: #111;
     }
-    h2 {
-      margin-top: 0;
-    }
+    h2 { margin-top: 0; }
+
     .search-bar {
       display: flex;
       gap: 8px;
@@ -29,18 +28,32 @@
       border: 1px solid #ccc;
       font-size: 13px;
     }
-    .search-bar input {
-      flex: 1;
+    .search-bar input { flex: 1; }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0 12px;
     }
+    .toolbar input {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+    }
+
     #priceTable {
       background: #fff;
       border-radius: 10px;
       padding: 8px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      max-height: 420px;
+      max-height: 520px;
       overflow: auto;
       margin-bottom: 16px;
     }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -58,6 +71,7 @@
       top: 0;
       z-index: 1;
     }
+
     .order-panel {
       background: #fff;
       border-radius: 10px;
@@ -80,6 +94,7 @@
       width: 100%;
       box-sizing: border-box;
     }
+
     .btn {
       padding: 6px 12px;
       border-radius: 8px;
@@ -89,15 +104,15 @@
       background: #2563eb;
       color: #fff;
     }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
-    #orderStatus {
-      font-size: 12px;
-    }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    #orderStatus { font-size: 12px; }
+
+    .muted { color: #666; font-size: 12px; }
+    .right { text-align: right; }
   </style>
 </head>
+
 <body>
   <h2>D2D Rep Orders (Web)</h2>
 
@@ -132,34 +147,50 @@
   </div>
 
   <script>
-    // TODO: replace with your Apps Script web app URL (the /exec URL)
+    // Your Apps Script Web App (/exec)
     const API_URL = 'https://script.google.com/macros/s/AKfycbz_rJKxXo51whg4b-f2Mz6TW6RoJ2P4V5QlZDuHVwrrC8NcY3bFTODYfrDSMVGCgkdFLQ/exec';
+
+    // We only render these columns for speed:
+    // Your backend returns rows shaped like Price List starting at Alias index 0
+    // [0]=Alias, [1]=ItemName, [7]=CustomerPrice, [9]=Margin P%
+    const IDX_ITEMNAME = 1;
+    const IDX_PRICE = 7;
+    const IDX_MARGIN = 9;
 
     let customers = [];
     let currentCustomerId = null;
     let currentPriceData = null;
 
+    let filteredRowIdxs = [];
+    let renderCount = 0;
+    const PAGE_SIZE = 200;
+
+    function setStatus(msg) {
+      document.getElementById('orderStatus').textContent = msg || '';
+    }
+
     async function apiCall(payload) {
+      // text/plain avoids CORS preflight for Apps Script web apps
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
-    
+
       if (!res.ok) throw new Error('HTTP ' + res.status);
-    
+
       const data = await res.json();
       if (data && data.error) throw new Error(data.error);
       if (data && data.success === false && data.error) throw new Error(data.error);
-    
       return data;
     }
 
     async function loadCustomers() {
-      document.getElementById('orderStatus').textContent = 'Loading customers...';
+      setStatus('Loading customers...');
       try {
         const data = await apiCall({ action: 'getCustomers' });
         customers = data.customers || data || [];
+
         const sel = document.getElementById('customerSelect');
         sel.innerHTML = '<option value="">-- Select customer --</option>';
         customers.forEach(c => {
@@ -168,15 +199,17 @@
           opt.textContent = c.customerId + ' - ' + c.name;
           sel.appendChild(opt);
         });
-        document.getElementById('orderStatus').textContent = '';
+
+        setStatus('');
       } catch (err) {
-        document.getElementById('orderStatus').textContent = 'Error: ' + err.message;
+        setStatus('Error: ' + err.message);
       }
     }
 
     function filterCustomers() {
       const q = document.getElementById('customerSearch').value.toLowerCase();
       const sel = document.getElementById('customerSelect');
+
       sel.innerHTML = '<option value="">-- Select customer --</option>';
       customers
         .filter(c =>
@@ -197,99 +230,186 @@
       if (!cid) return;
 
       currentCustomerId = cid;
+      currentPriceData = null;
+      filteredRowIdxs = [];
+      renderCount = 0;
+
       document.getElementById('priceTable').innerHTML = '<p>Loading price sheet...</p>';
-      document.getElementById('orderStatus').textContent = '';
+      setStatus('');
 
       try {
         const data = await apiCall({ action: 'getPriceSheet', customerId: cid });
         currentPriceData = data;
-        renderPriceSheet(data);
+
+        // Build initial row index list (all rows)
+        if (!data || !data.rows || !data.rows.length) {
+          document.getElementById('priceTable').innerHTML = '<p>No items found for this customer.</p>';
+          return;
+        }
+        filteredRowIdxs = Array.from({ length: data.rows.length }, (_, i) => i);
+
+        renderPriceShell_();
+        applyItemFilter_(); // initial render
       } catch (err) {
         document.getElementById('priceTable').innerHTML = '<p>Error: ' + err.message + '</p>';
       }
     }
 
-    function renderPriceSheet(data) {
+    function renderPriceShell_() {
       const container = document.getElementById('priceTable');
 
-      if (!data || !data.headers || !data.rows || !data.rows.length) {
-        container.innerHTML = '<p>No items found for this customer.</p>';
+      container.innerHTML =
+        '<div class="toolbar">' +
+          '<input id="itemSearch" type="text" placeholder="Search items (fast)">' +
+          '<button class="btn" id="loadMoreBtn" type="button">Load more</button>' +
+        '</div>' +
+        '<div class="muted" id="rowInfo"></div>' +
+        '<table>' +
+          '<thead><tr>' +
+            '<th style="width:70px">Qty</th>' +
+            '<th>ItemName</th>' +
+            '<th class="right" style="width:120px">CustomerPrice</th>' +
+            '<th class="right" style="width:90px">Margin</th>' +
+          '</tr></thead>' +
+          '<tbody id="rowsTbody"></tbody>' +
+        '</table>';
+
+      document.getElementById('itemSearch').addEventListener('input', debounce_(applyItemFilter_, 150));
+      document.getElementById('loadMoreBtn').addEventListener('click', renderMoreRows_);
+    }
+
+    function applyItemFilter_() {
+      const q = (document.getElementById('itemSearch')?.value || '').toLowerCase().trim();
+
+      const rows = currentPriceData.rows;
+      if (!q) {
+        filteredRowIdxs = Array.from({ length: rows.length }, (_, i) => i);
+      } else {
+        const out = [];
+        for (let i = 0; i < rows.length; i++) {
+          const item = rows[i][IDX_ITEMNAME];
+          const s = (item == null ? '' : String(item)).toLowerCase();
+          if (s.includes(q)) out.push(i);
+        }
+        filteredRowIdxs = out;
+      }
+
+      renderCount = 0;
+      document.getElementById('rowsTbody').innerHTML = '';
+      renderMoreRows_();
+    }
+
+    function renderMoreRows_() {
+      const tbody = document.getElementById('rowsTbody');
+      if (!tbody) return;
+
+      const rows = currentPriceData.rows;
+      const start = renderCount;
+      const end = Math.min(renderCount + PAGE_SIZE, filteredRowIdxs.length);
+
+      let html = '';
+      for (let k = start; k < end; k++) {
+        const idx = filteredRowIdxs[k];
+        const row = rows[idx];
+
+        const itemName = (row[IDX_ITEMNAME] == null ? '' : String(row[IDX_ITEMNAME])).trim();
+
+        const pRaw = row[IDX_PRICE];
+        const pNum = Number(pRaw);
+        const priceTxt = isNaN(pNum) ? '' : ('$' + pNum.toFixed(2));
+
+        const mRaw = row[IDX_MARGIN];
+        const mNum = Number(mRaw);
+        const marginTxt = isNaN(mNum) ? '' : ((mNum * 100).toFixed(1) + '%');
+
+        html +=
+          '<tr data-rowidx="' + idx + '">' +
+            '<td><input type="number" min="0" data-row="' + idx + '" style="width:60px"></td>' +
+            '<td>' + escapeHtml_(itemName) + '</td>' +
+            '<td class="right">' + escapeHtml_(priceTxt) + '</td>' +
+            '<td class="right">' + escapeHtml_(marginTxt) + '</td>' +
+          '</tr>';
+      }
+
+      tbody.insertAdjacentHTML('beforeend', html);
+      renderCount = end;
+
+      const info = document.getElementById('rowInfo');
+      if (info) info.textContent = 'Showing ' + renderCount + ' of ' + filteredRowIdxs.length + ' items';
+
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      if (loadMoreBtn) loadMoreBtn.disabled = (renderCount >= filteredRowIdxs.length);
+    }
+
+    async function submitOrder() {
+      if (!currentCustomerId || !currentPriceData) {
+        setStatus('Select a customer and load items first.');
         return;
       }
 
-      let html = '<table><thead><tr>';
-      data.headers.forEach(h => {
-        html += '<th>' + (h === '' ? '' : String(h)) + '</th>';
-      });
-      html += '<th>Qty</th></tr></thead><tbody>';
+      const inputs = document.querySelectorAll('#rowsTbody input[type="number"]');
+      const items = [];
 
-      data.rows.forEach((row, idx) => {
-        html += '<tr>';
-        row.forEach(cell => {
-          html += '<td>' + (cell === '' || cell == null ? '' : String(cell)) + '</td>';
-        });
-        html += '<td><input type="number" min="0" data-row="' + idx + '" style="width:60px"></td>';
-        html += '</tr>';
+      inputs.forEach(input => {
+        const qty = Number(input.value || 0);
+        if (qty > 0) {
+          const rowIdx = Number(input.dataset.row);
+          const row = currentPriceData.rows[rowIdx];
+          const itemName = (row[IDX_ITEMNAME] == null ? '' : String(row[IDX_ITEMNAME])).trim();
+          if (itemName) items.push({ itemName: itemName, qty: qty });
+        }
       });
 
-      html += '</tbody></table>';
-      container.innerHTML = html;
+      if (!items.length) {
+        setStatus('No quantities entered.');
+        return;
+      }
+
+      const payload = {
+        action: 'placeRepOrder',
+        customerId: String(currentCustomerId).trim(),
+        requestedDate: document.getElementById('reqDate').value,
+        note: document.getElementById('note').value,
+        orderItems: items
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      setStatus('Submitting order...');
+
+      try {
+        const res = await apiCall(payload);
+        btn.disabled = false;
+        setStatus('Order submitted. ID: ' + (res && res.orderId ? res.orderId : '(no id)'));
+      } catch (err) {
+        btn.disabled = false;
+        setStatus('Error: ' + err.message);
+      }
     }
 
- async function submitOrder() {
-  if (!currentCustomerId || !currentPriceData) {
-    document.getElementById('orderStatus').textContent = 'Select a customer and load items first.';
-    return;
-  }
-
-  const inputs = document.querySelectorAll('#priceTable input[type="number"]');
-  const items = [];
-
-  inputs.forEach(input => {
-    const qty = Number(input.value || 0);
-    if (qty > 0) {
-      const rowIdx = Number(input.dataset.row);
-      const row = currentPriceData.rows[rowIdx];
-
-      const itemName = (row[1] == null ? '' : String(row[1])).trim(); // ItemName (index 1)
-      if (itemName) items.push({ itemName: itemName, qty: qty });
+    function debounce_(fn, ms) {
+      let t = null;
+      return function() {
+        clearTimeout(t);
+        t = setTimeout(fn, ms);
+      };
     }
-  });
 
-  if (!items.length) {
-    document.getElementById('orderStatus').textContent = 'No quantities entered.';
-    return;
-  }
+    function escapeHtml_(s) {
+      s = (s == null ? '' : String(s));
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-  const payload = {
-    action: 'placeRepOrder',
-    customerId: String(currentCustomerId).trim(),
-    requestedDate: document.getElementById('reqDate').value,
-    note: document.getElementById('note').value,
-    orderItems: items
-  };
-
-  const statusEl = document.getElementById('orderStatus');
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  statusEl.textContent = 'Submitting order...';
-
-  try {
-    const res = await apiCall(payload);
-    btn.disabled = false;
-    statusEl.textContent = 'Order submitted. ID: ' + (res && res.orderId ? res.orderId : '(no id)');
-  } catch (err) {
-    btn.disabled = false;
-    statusEl.textContent = 'Error: ' + err.message;
-  }
-}
-
-    document.getElementById('customerSearch').addEventListener('input', filterCustomers);
+    document.getElementById('customerSearch').addEventListener('input', debounce_(filterCustomers, 120));
     document.getElementById('customerSelect').addEventListener('change', loadPriceSheet);
     document.getElementById('reloadBtn').addEventListener('click', loadCustomers);
     document.getElementById('submitBtn').addEventListener('click', submitOrder);
 
-    // Initial load
     loadCustomers();
   </script>
 </body>

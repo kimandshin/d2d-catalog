@@ -133,7 +133,7 @@
 
   <script>
     // TODO: replace with your Apps Script web app URL (the /exec URL)
-    const API_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbz_rJKxXo51whg4b-f2Mz6TW6RoJ2P4V5QlZDuHVwrrC8NcY3bFTODYfrDSMVGCgkdFLQ/exec';
 
     let customers = [];
     let currentCustomerId = null;
@@ -142,12 +142,16 @@
     async function apiCall(payload) {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
+    
       if (!res.ok) throw new Error('HTTP ' + res.status);
+    
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (data && data.error) throw new Error(data.error);
+      if (data && data.success === false && data.error) throw new Error(data.error);
+    
       return data;
     }
 
@@ -232,59 +236,53 @@
       container.innerHTML = html;
     }
 
-    async function submitOrder() {
-      if (!currentCustomerId || !currentPriceData) {
-        document.getElementById('orderStatus').textContent = 'Select a customer and load items first.';
-        return;
-      }
+ async function submitOrder() {
+  if (!currentCustomerId || !currentPriceData) {
+    document.getElementById('orderStatus').textContent = 'Select a customer and load items first.';
+    return;
+  }
 
-      const inputs = document.querySelectorAll('#priceTable input[type="number"]');
-      const items = [];
-      inputs.forEach(input => {
-        const qty = Number(input.value || 0);
-        if (qty > 0) {
-          const rowIdx = Number(input.dataset.row);
-          const row = currentPriceData.rows[rowIdx];
+  const inputs = document.querySelectorAll('#priceTable input[type="number"]');
+  const items = [];
 
-          // Same structure: [0]=Alias, [1]=ItemName, [2]=DescriptionEn, [5]=SKU
-          const sku = row[5];
-          const description = row[2];
+  inputs.forEach(input => {
+    const qty = Number(input.value || 0);
+    if (qty > 0) {
+      const rowIdx = Number(input.dataset.row);
+      const row = currentPriceData.rows[rowIdx];
 
-          items.push({
-            sku: sku,
-            description: description,
-            qty: qty
-          });
-        }
-      });
-
-      if (!items.length) {
-        document.getElementById('orderStatus').textContent = 'No quantities entered.';
-        return;
-      }
-
-      const payload = {
-        action: 'placeRepOrder',
-        customerId: currentCustomerId,
-        requestedDate: document.getElementById('reqDate').value,
-        note: document.getElementById('note').value,
-        orderItems: items
-      };
-
-      const statusEl = document.getElementById('orderStatus');
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      statusEl.textContent = 'Submitting order...';
-
-      try {
-        const res = await apiCall(payload);
-        btn.disabled = false;
-        statusEl.textContent = 'Order submitted. ID: ' + (res && res.orderId ? res.orderId : '(no id)');
-      } catch (err) {
-        btn.disabled = false;
-        statusEl.textContent = 'Error: ' + err.message;
-      }
+      const itemName = (row[1] == null ? '' : String(row[1])).trim(); // ItemName (index 1)
+      if (itemName) items.push({ itemName: itemName, qty: qty });
     }
+  });
+
+  if (!items.length) {
+    document.getElementById('orderStatus').textContent = 'No quantities entered.';
+    return;
+  }
+
+  const payload = {
+    action: 'placeRepOrder',
+    customerId: String(currentCustomerId).trim(),
+    requestedDate: document.getElementById('reqDate').value,
+    note: document.getElementById('note').value,
+    orderItems: items
+  };
+
+  const statusEl = document.getElementById('orderStatus');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  statusEl.textContent = 'Submitting order...';
+
+  try {
+    const res = await apiCall(payload);
+    btn.disabled = false;
+    statusEl.textContent = 'Order submitted. ID: ' + (res && res.orderId ? res.orderId : '(no id)');
+  } catch (err) {
+    btn.disabled = false;
+    statusEl.textContent = 'Error: ' + err.message;
+  }
+}
 
     document.getElementById('customerSearch').addEventListener('input', filterCustomers);
     document.getElementById('customerSelect').addEventListener('change', loadPriceSheet);
